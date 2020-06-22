@@ -4,9 +4,7 @@ import tornado.httpclient
 
 class MainHandler(tornado.web.RequestHandler):
     async def get(self):
-        target = self.get_argument('target', None)
-        response = {'target': target}
-        self.write(response)
+        target = self.get_argument('target', None)        
         http_client = tornado.httpclient.AsyncHTTPClient()
         try:
             request = tornado.httpclient.HTTPRequest(url=str(target), \
