@@ -30,7 +30,6 @@ def make_app():
     ])
 
 if __name__ == "__main__":
-    #dockerhub autobuild testing comment
     import os, re
     proxy = os.getenv('HTTP_PROXY')
     splits = re.split('/|:|@',proxy)
