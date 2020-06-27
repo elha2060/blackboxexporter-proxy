@@ -10,10 +10,9 @@ class MainHandler(tornado.web.RequestHandler):
         network_location = str(urlparse(target).netloc)
         now = datetime.datetime.now()
         if(network_location not in ledger or ledger[network_location]["lasttick"] < now - datetime.timedelta(days=1)):
-            #command = "echo | openssl s_client -showcerts -connect " + network_location + " -proxy " + proxy_host + ":" + proxy_port + " 2>/dev/null | openssl x509 -enddate --noout"
             proxy_string = proxy_host + ":" + proxy_port
             p1 = subprocess.Popen(["echo"], stdout=subprocess.PIPE)
-            p2 = subprocess.Popen(["openssl", "s_client", "-showcerts", "-connect", network_location, "-proxy", proxy_string], stdin=p1.stdout, stdout=subprocess.PIPE)
+            p2 = subprocess.Popen(["openssl", "s_client", "-servername", network_location, "-showcerts", "-connect", network_location, "-proxy", proxy_string], stdin=p1.stdout, stdout=subprocess.PIPE)
             p3 = subprocess.Popen(["openssl", "x509", "-enddate", "--noout"], stdin=p2.stdout, stdout=subprocess.PIPE)
             p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
             p2.stdout.close()
@@ -54,7 +53,7 @@ if __name__ == "__main__":
     proxy_username = splits[3]
     proxy_password = splits[4]
     proxy_host = splits[5]
-    proxy_port = splits[6] 
+    proxy_port = splits[6]
     app = make_app()
     app.listen(8888)
     tornado.httpclient.AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
