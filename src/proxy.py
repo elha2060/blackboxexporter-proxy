@@ -12,20 +12,24 @@ class MainHandler(tornado.web.RequestHandler):
         if(network_location not in ledger or ledger[network_location]["lasttick"] < now - datetime.timedelta(days=1)):
             proxy_string = proxy_host + ":" + proxy_port
             command = "echo | openssl s_client -showcerts -connect " + network_location + " -servername " + network_location + " -proxy " + proxy_string + " 2>/dev/null | openssl x509 -enddate --noout"
-            p = subprocess.run(command, shell=True, timeout=5, capture_output=True)
-            output = p.stdout.decode().rstrip("\n")
-            if (p.stderr):
-                print(p.stderr.decode())
+            try:
+                p = subprocess.run(command, shell=True, timeout=5, capture_output=True)
+            except Exception as e:
+                print(str(e))
             else:
-                date_string = (re.split('=',output)[1])
-                date_format = "%b %d %H:%M:%S %Y %Z"
-                date = datetime.datetime.strptime(date_string, date_format)
-                expiry = (date - now).days
-                ledger[network_location] = {"lasttick":now, "expiry":expiry}
+                output = p.stdout.decode().rstrip("\n")
+                if (p.stderr):
+                    print(p.stderr.decode())
+                else:
+                    date_string = (re.split('=',output)[1])
+                    date_format = "%b %d %H:%M:%S %Y %Z"
+                    date = datetime.datetime.strptime(date_string, date_format)
+                    expiry = (date - now).days
+                    ledger[network_location] = {"lasttick":now, "expiry":expiry}
         http_client = tornado.httpclient.AsyncHTTPClient()
         try:
             request = tornado.httpclient.HTTPRequest(url=str(target), \
-                    connect_timeout=5, \
+                    connect_timeout=3, \
                     proxy_host=proxy_host, \
                     proxy_port=int(proxy_port), \
                     proxy_username=proxy_username, \
