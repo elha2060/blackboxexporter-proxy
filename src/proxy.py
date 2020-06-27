@@ -11,21 +11,21 @@ class MainHandler(tornado.web.RequestHandler):
         now = datetime.datetime.now()
         if(network_location not in ledger or ledger[network_location]["lasttick"] < now - datetime.timedelta(days=1)):
             proxy_string = proxy_host + ":" + proxy_port
-            p1 = subprocess.Popen(["echo"], stdout=subprocess.PIPE)
-            p2 = subprocess.Popen(["openssl", "s_client", "-servername", network_location, "-showcerts", "-connect", network_location, "-proxy", proxy_string], stdin=p1.stdout, stdout=subprocess.PIPE)
-            p3 = subprocess.Popen(["openssl", "x509", "-enddate", "--noout"], stdin=p2.stdout, stdout=subprocess.PIPE)
-            p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
-            p2.stdout.close()
-            output = p3.communicate()[0].decode()
-            date_string = (re.split('=',output)[1]).rstrip("\n")
-            date_format = "%b %d %H:%M:%S %Y %Z"
-            date = datetime.datetime.strptime(date_string, date_format)
-            expiry = (date - now).days
-            ledger[network_location] = {"lasttick":now, "expiry":expiry}
+            command = "echo | openssl s_client -showcerts -connect " + network_location + " -servername " + network_location + " -proxy " + proxy_string + " 2>/dev/null | openssl x509 -enddate --noout"
+            p = subprocess.run(command, shell=True, timeout=5, capture_output=True)
+            output = p.stdout.decode().rstrip("\n")
+            if (p.stderr):
+                print(p.stderr.decode())
+            else:
+                date_string = (re.split('=',output)[1])
+                date_format = "%b %d %H:%M:%S %Y %Z"
+                date = datetime.datetime.strptime(date_string, date_format)
+                expiry = (date - now).days
+                ledger[network_location] = {"lasttick":now, "expiry":expiry}
         http_client = tornado.httpclient.AsyncHTTPClient()
         try:
             request = tornado.httpclient.HTTPRequest(url=str(target), \
-                    connect_timeout=10, \
+                    connect_timeout=5, \
                     proxy_host=proxy_host, \
                     proxy_port=int(proxy_port), \
                     proxy_username=proxy_username, \
