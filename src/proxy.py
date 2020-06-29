@@ -3,10 +3,17 @@ import tornado.web
 import tornado.httpclient
 import os, datetime, subprocess
 from urllib.parse import urlparse
+import re
 
 class MainHandler(tornado.web.RequestHandler):
     async def get(self):
         target = self.get_argument('target', None)
+        proxy = self.get_argument('proxy', None)
+        splits = re.split(':|@',str(proxy))
+        proxy_username = splits[0]
+        proxy_password = splits[1]
+        proxy_host = splits[2]
+        proxy_port = splits[3]
         network_location = str(urlparse(target).netloc)
         now = datetime.datetime.now()
         if(network_location not in ledger or ledger[network_location]["lasttick"] < now - datetime.timedelta(days=1)):
@@ -48,16 +55,9 @@ def make_app():
     ])
 
 if __name__ == "__main__":
-    import re
-    proxy = os.getenv('HTTP_PROXY')
     global ledger
     ledger = {}
-    splits = re.split('/|:|@',proxy)
-    global proxy_username, proxy_password, proxy_host, proxy_port, timer
-    proxy_username = splits[3]
-    proxy_password = splits[4]
-    proxy_host = splits[5]
-    proxy_port = splits[6]
+    global timer
     app = make_app()
     app.listen(8888)
     tornado.httpclient.AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
