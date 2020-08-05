@@ -26,8 +26,10 @@ class MainHandler(tornado.web.RequestHandler):
                     allow_ipv6=False)
             response = await http_client.fetch(request)
         except Exception as e:
+            self.set_status(e.code)
             self.write(str(e))
         else:
+            self.set_status(response.code)
             self.write(str(response.body))
     
     async def post(self):
@@ -54,8 +56,10 @@ class MainHandler(tornado.web.RequestHandler):
                     allow_ipv6=False)
             response = await http_client.fetch(request)
         except Exception as e:
+            self.set_status(e.code)
             self.write(str(e))
         else:
+            self.set_status(response.code)
             if response.headers['Content-Type'] == 'application/json':
                 self.write(tornado.escape.json_decode(response.body))
             else:
@@ -67,9 +71,6 @@ def make_app():
     ])
 
 if __name__ == "__main__":
-    global ledger
-    ledger = {}
-    global timer
     app = make_app()
     app.listen(8888)
     tornado.httpclient.AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")

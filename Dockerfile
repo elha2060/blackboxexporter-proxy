@@ -5,7 +5,7 @@ WORKDIR /install
 RUN apk update \
     && apk add --virtual .build-deps \
         curl-dev gcc curl-dev musl-dev 
-RUN python3 -m pip install --target="/install" tornado pycurl
+RUN python3 -m pip install --target="/install" tornado
 FROM base
 COPY --from=builder /install /app
 COPY src /app
