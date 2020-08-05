@@ -5,11 +5,11 @@ WORKDIR /install
 RUN apk update \
     && apk add --virtual .build-deps \
         curl-dev gcc curl-dev musl-dev 
-RUN python3 -m pip install --target="/install" tornado
+RUN python3 -m pip install --target="/install" tornado pycurl
 FROM base
 COPY --from=builder /install /app
 COPY src /app
 WORKDIR /app
-RUN apk add --no-cache libcurl openssl
+RUN apk add --no-cache libcurl openssl curl
 CMD ["python3", "proxy.py"]
 EXPOSE 8888
