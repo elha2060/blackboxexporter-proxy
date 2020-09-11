@@ -17,7 +17,7 @@ class MainHandler(tornado.web.RequestHandler):
         try:
             request = tornado.httpclient.HTTPRequest(method="GET",
                     url=str(target), \
-                    connect_timeout=3, \
+                    connect_timeout=10, \
                     proxy_host=proxy_host, \
                     proxy_port=int(proxy_port), \
                     proxy_username=proxy_username, \
@@ -47,7 +47,7 @@ class MainHandler(tornado.web.RequestHandler):
                     url=str(target), \
                     body=self.request.body, \
                     headers=headers, \
-                    connect_timeout=3, \
+                    connect_timeout=10, \
                     proxy_host=proxy_host, \
                     proxy_port=int(proxy_port), \
                     proxy_username=proxy_username, \
