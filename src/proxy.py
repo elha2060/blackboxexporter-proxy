@@ -64,7 +64,7 @@ class MainHandler(tornado.web.RequestHandler):
                 self.write(tornado.escape.json_decode(response.body))
                 body = tornado.escape.json_decode(response.body)
                 access_token = body["access_token"]
-                tld = re.split('\.|/',str(target))[4]
+                tld = re.split('\.|/|:',str(target))[5]
                 if tld == 'com':
                     region = 'EMEA'
                 elif tld == 'cn':
