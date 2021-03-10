@@ -62,6 +62,21 @@ class MainHandler(tornado.web.RequestHandler):
             self.set_status(response.code)
             if response.headers['Content-Type'] == 'application/json':
                 self.write(tornado.escape.json_decode(response.body))
+                body = tornado.escape.json_decode(response.body)
+                access_token = body["access_token"]
+                tld = re.split('\.|/',str(target))[4]
+                if tld == 'com':
+                    region = 'EMEA'
+                elif tld == 'cn':
+                    region = 'CN'
+                elif tld == 'us':
+                    region = 'US'
+                elif tld == 'ru':
+                    region = 'RU'
+                filename='/data/'+region
+                f = open(filename, "w")
+                f.write(access_token)
+                f.close()
             else:
                 self.write(str(response.body))
 
